@@ -3,60 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YAI Games | Ad-Free Hub</title>
+    <title>YAI Games | True Black</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Pure Black OLED Theme */
         body {
-            background-color: #0d0f12;
-            color: #e2e8f0;
+            background-color: #000000;
+            color: #ffffff;
             font-family: system-ui, -apple-system, sans-serif;
         }
-        /* Custom Glowing Navbar */
+        
+        /* Minimalist Navbar */
         .navbar {
-            background-color: #14181f !important;
-            border-bottom: 2px solid #00ff66;
+            background-color: #000000 !important;
+            border-bottom: 1px solid #1e293b;
+            padding: 15px 0;
         }
         .navbar-brand {
-            color: #00ff66 !important;
-            font-weight: 800;
-            letter-spacing: 1px;
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
         }
-        /* Game Cards Styling */
+        
+        /* Custom Logo Image Styling */
+        .navbar-logo {
+            height: 32px; /* Adjust height to fit your custom image perfectly */
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Pure Black Cards with subtle borders */
         .game-card {
-            background: #14181f;
-            border: 1px solid #2d3748;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            background: #000000;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
             height: 100%;
         }
         .game-card:hover:not(.locked-card) {
-            transform: translateY(-5px);
-            border-color: #00ff66;
-            box-shadow: 0 5px 15px rgba(0, 255, 102, 0.15);
+            border-color: #475569;
         }
-        .card-icon {
-            font-size: 2.5rem;
-            color: #00ff66;
-            background: rgba(0, 255, 102, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            display: inline-block;
-        }
+
+        /* Solid White Interactive Button */
         .btn-play {
-            background-color: #00ff66;
-            color: #0d0f12;
+            background-color: #ffffff;
+            color: #000000;
             font-weight: 600;
             border: none;
             width: 100%;
             padding: 10px;
-            border-radius: 8px;
-            transition: background 0.2s;
+            border-radius: 6px;
+            transition: background 0.15s ease;
         }
         .btn-play:hover {
-            background-color: #00cc52;
-            color: #0d0f12;
+            background-color: #e2e8f0;
+            color: #000000;
+        }
+        
+        .text-muted {
+            color: #64748b !important;
+        }
+        .font-monospace {
+            font-family: monospace;
         }
     </style>
 </head>
@@ -64,17 +75,21 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark mb-5">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="bi bi-controller me-2"></i>YAI GAMES</a>
-            <span class="navbar-text text-muted d-none d-sm-inline">
-                <i class="bi bi-shield-check text-success me-1"></i> 100% Ad-Free Forever
+            <a class="navbar-brand" href="#">
+                <img src="your-logo.png" alt="Logo" class="navbar-logo me-2">
+                YAI GAMES
+            </a>
+            <span class="navbar-text text-muted d-none d-sm-inline small">
+                Performance Optimized
             </span>
         </div>
     </nav>
 
     <div class="container mb-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">Welcome to the Lair</h1>
-            <p class="text-muted fs-5">No ads, no tracking, just pure HTML5 web games.</p>
+        <div class="mb-5">
+            <h1 class="fw-bold h2">Core Repository</h1>
+            <p class="text-muted small">Ad-free HTML5/JavaScript web environment.</p>
+            <hr style="border-color: #1e293b;">
         </div>
 
         <div class="row g-4 justify-content-center">
@@ -82,37 +97,29 @@
             <div class="col-12 col-md-6 col-lg-5">
                 <div class="game-card p-4 d-flex flex-column justify-content-between">
                     <div>
-                        <div class="text-center mb-4 p-3 rounded" style="background: rgba(0, 255, 102, 0.03); border: 1px dashed rgba(0, 255, 102, 0.2);">
-                            <div class="display-6 fw-bold" style="color: #00ff66; text-shadow: 0 0 10px rgba(0,255,102,0.3); font-family: monospace;">
-                                🐍 S-N-A-K-E
-                            </div>
-                            <small class="text-uppercase tracking-wider text-muted" style="font-size: 0.7rem; letter-spacing: 2px;">Ad-Free Classic</small>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-dark font-monospace" style="border: 1px solid #1e293b;">v1.2.0</span>
                         </div>
-                        
-                        <h3 class="h5 fw-bold text-center mb-2">Retro Snake</h3>
-                        <p class="text-muted text-center small">The classic arcade game. Control the snake, eat the red food, and avoid hitting the walls or yourself.</p>
+                        <h3 class="h5 fw-bold mb-2">Retro Snake</h3>
+                        <p class="text-muted small">Classic keyboard-controlled grid movement logic. Eat targets, scale size parameters, prevent wall or self collision events.</p>
                     </div>
                     <div class="mt-4">
-                        <a href="snake.html" class="btn btn-play">Play Now <i class="bi bi-play-fill ms-1"></i></a>
+                        <a href="snake.html" class="btn btn-play">Execute Game</a>
                     </div>
                 </div>
             </div>
 
             <div class="col-12 col-md-6 col-lg-5">
-                <div class="game-card locked-card p-4 d-flex flex-column justify-content-between opacity-50">
+                <div class="game-card locked-card p-4 d-flex flex-column justify-content-between opacity-50" style="border-style: dashed;">
                     <div>
-                        <div class="text-center mb-4 p-3 rounded" style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1);">
-                            <div class="display-6 fw-bold text-secondary" style="font-family: monospace;">
-                                🛠️ NEXT GAME
-                            </div>
-                            <small class="text-uppercase tracking-wider text-muted" style="font-size: 0.7rem; letter-spacing: 2px;">Under Construction</small>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-dark text-muted font-monospace" style="border: 1px solid #1e293b;">PENDING</span>
                         </div>
-                        
-                        <h3 class="h5 fw-bold text-center mb-2 text-secondary">More Coming Soon</h3>
-                        <p class="text-muted text-center small">A new custom, ad-free JavaScript game will be dropping directly into this slot via the next repository update.</p>
+                        <h3 class="h5 fw-bold mb-2 text-muted">Next Project</h3>
+                        <p class="text-muted small">Additional clean architecture deployment slot. Ready for next game payload injection.</p>
                     </div>
                     <div class="mt-4">
-                        <button class="btn btn-secondary w-100" disabled>Project Locked</button>
+                        <button class="btn btn-outline-secondary w-100" style="border-radius: 6px;" disabled>Offline</button>
                     </div>
                 </div>
             </div>
@@ -120,6 +127,5 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
