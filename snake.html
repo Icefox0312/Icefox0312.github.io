@@ -13,20 +13,39 @@
             margin: 0; 
             padding: 20px; 
         }
+        
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .text-muted {
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        /* Wraps tightly to prevent any border leaking */
         .game-container {
             position: relative;
-            /* Scaled up container to match the new 600px width */
             width: 600px;
+            height: 600px;
             margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden; /* This hard-stops elements from rendering outside bounds */
+            box-shadow: 0 0 25px rgba(0,255,102,0.2); 
         }
+
         canvas { 
             background: #14181f; 
             border: 4px solid #2d3748; 
             display: block; 
-            box-shadow: 0 0 25px rgba(0,255,102,0.2); 
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
             border-radius: 8px;
         }
-        /* Game Over Screen Overlay adjusted for larger size */
+
+        /* Game Over Screen Overlay - Fits flawlessly inside the container boundaries */
         #gameOverScreen {
             display: none;
             position: absolute;
@@ -34,26 +53,30 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 15, 18, 0.9);
-            border-radius: 8px;
+            background: rgba(20, 24, 31, 0.95); /* Matches canvas background color perfectly */
             flex-direction: column;
             justify-content: center;
             align-items: center;
             border: 4px solid #ff3333;
             box-sizing: border-box;
+            border-radius: 8px;
+            z-index: 10; /* Ensures it layers above the running canvas context */
         }
+
         #gameOverScreen h2 {
             color: #ff3333;
             font-size: 3.5rem;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             text-shadow: 0 0 15px rgba(255,51,51,0.6);
             letter-spacing: 2px;
         }
+
         #finalScore {
             font-size: 1.5rem;
             margin-bottom: 25px;
             color: #e2e8f0;
         }
+
         .btn { 
             background: #00ff66; 
             color: #0d0f12; 
@@ -67,17 +90,21 @@
             font-size: 1.1rem;
             transition: background 0.2s, transform 0.1s;
         }
+
         .btn:hover { 
             background: #00cc52; 
             transform: scale(1.05);
         }
+
         .btn-restart {
             background: #ff3333;
             color: #fff;
         }
+
         .btn-restart:hover {
             background: #cc2424;
         }
+
         .score-board {
             font-size: 1.8rem;
             font-weight: bold;
@@ -111,12 +138,10 @@
         const currentScoreDoc = document.getElementById("currentScore");
         const finalScoreDoc = document.getElementById("finalScore");
         
-        // Grid size boosted to 30px for larger segments
         const gridSize = 30;
         let snake, dx, dy, foodX, foodY, score, gameInterval;
 
         function initGame() {
-            // Starting positions adjusted to perfectly align with the new 30px grid scale
             snake = [{x: 240, y: 240}, {x: 210, y: 240}, {x: 180, y: 240}];
             dx = gridSize;
             dy = 0;
@@ -140,7 +165,7 @@
                 moveSnake(); 
                 drawSnake(); 
                 nextTick();
-            }, 100); // 100ms keeps standard arcade movement velocity
+            }, 100);
         }
 
         function clearCanvas() { ctx.fillStyle = "#14181f"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
@@ -150,41 +175,4 @@
             snake.forEach(part => ctx.fillRect(part.x, part.y, gridSize-2, gridSize-2)); 
         }
         
-        function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            snake.unshift(head);
-            if (snake[0].x === foodX && snake[0].y === foodY) { 
-                score += 10; 
-                currentScoreDoc.innerText = score;
-                createFood(); 
-            } else { 
-                snake.pop(); 
-            }
-        }
-        
-        function randomTen(min, max) { return Math.round((Math.random() * (max-min) + min) / gridSize) * gridSize; }
-        function createFood() { foodX = randomTen(0, canvas.width - gridSize); foodY = randomTen(0, canvas.height - gridSize); }
-        function drawFood() { ctx.fillStyle = '#ff3333'; ctx.fillRect(foodX, foodY, gridSize-2, gridSize-2); }
-        
-        function hasGameEnded() {
-            for (let i = 4; i < snake.length; i++) { if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; }
-            return snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height;
-        }
-
-        function resetGame() {
-            clearTimeout(gameInterval);
-            initGame();
-        }
-
-        window.addEventListener("keydown", e => {
-            if (e.key === "ArrowLeft" && dx === 0) { dx = -gridSize; dy = 0; }
-            if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -gridSize; }
-            if (e.key === "ArrowRight" && dx === 0) { dx = gridSize; dy = 0; }
-            if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = gridSize; }
-        });
-
-        // Fire up engine instance
-        initGame();
-    </script>
-</body>
-</html>
+        function
