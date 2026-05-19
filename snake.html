@@ -24,6 +24,10 @@
             margin-bottom: 20px;
         }
 
+        .controls-wrapper {
+            margin-bottom: 20px;
+        }
+
         /* Wraps tightly to prevent any border leaking */
         .game-container {
             position: relative;
@@ -33,6 +37,7 @@
             border-radius: 8px;
             overflow: hidden; /* This hard-stops elements from rendering outside bounds */
             box-shadow: 0 0 25px rgba(0,255,102,0.2); 
+            background: #14181f;
         }
 
         canvas { 
@@ -88,12 +93,24 @@
             text-decoration: none; 
             display: inline-block;
             font-size: 1.1rem;
+            margin: 0 5px;
             transition: background 0.2s, transform 0.1s;
         }
 
         .btn:hover { 
             background: #00cc52; 
             transform: scale(1.05);
+        }
+
+        .btn-fullscreen {
+            background: #171923;
+            color: #00ff66;
+            border: 2px solid #00ff66;
+        }
+
+        .btn-fullscreen:hover {
+            background: #00ff66;
+            color: #0d0f12;
         }
 
         .btn-restart {
@@ -112,14 +129,35 @@
             margin-top: 15px;
             text-shadow: 0 0 10px rgba(0,255,102,0.2);
         }
+
+        /* Fullscreen custom rules to keep it centered perfectly when triggered */
+        :-webkit-full-screen .game-container {
+            width: 90vh !important;
+            height: 90vh !important;
+            margin: 5vh auto !important;
+        }
+        :-ms-fullscreen .game-container {
+            width: 90vh !important;
+            height: 90vh !important;
+            margin: 5vh auto !important;
+        }
+        :fullscreen .game-container {
+            width: 90vh !important;
+            height: 90vh !important;
+            margin: 5vh auto !important;
+        }
     </style>
 </head>
 <body>
     <h1>🐍 Retro Snake</h1>
     <p class="text-muted">Use Arrow Keys on your keyboard to turn. Eat the red food!</p>
-    <a href="index.html" class="btn">Back to Hub</a>
     
-    <div class="game-container">
+    <div class="controls-wrapper">
+        <a href="index.html" class="btn">Back to Hub</a>
+        <button class="btn btn-fullscreen" onclick="toggleFullScreen()">Go Fullscreen 🖥️</button>
+    </div>
+    
+    <div class="game-container" id="fullscreenArea">
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         
         <div id="gameOverScreen">
@@ -175,4 +213,57 @@
             snake.forEach(part => ctx.fillRect(part.x, part.y, gridSize-2, gridSize-2)); 
         }
         
-        function
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            snake.unshift(head);
+            if (snake[0].x === foodX && snake[0].y === foodY) { 
+                score += 10; 
+                currentScoreDoc.innerText = score;
+                createFood(); 
+            } else { 
+                snake.pop(); 
+            }
+        }
+        
+        function randomTen(min, max) { return Math.round((Math.random() * (max-min) + min) / gridSize) * gridSize; }
+        function createFood() { foodX = randomTen(0, canvas.width - gridSize); foodY = randomTen(0, canvas.height - gridSize); }
+        function drawFood() { ctx.fillStyle = '#ff3333'; ctx.fillRect(foodX, foodY, gridSize-2, gridSize-2); }
+        
+        function hasGameEnded() {
+            for (let i = 4; i < snake.length; i++) { if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; }
+            return snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height;
+        }
+
+        function resetGame() {
+            clearTimeout(gameInterval);
+            initGame();
+        }
+
+        // Native Fullscreen API Controller
+        function toggleFullScreen() {
+            const element = document.getElementById("fullscreenArea");
+            if (!document.fullscreenElement) {
+                if (element.requestFullscreen) element.requestFullscreen();
+                else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+                else if (element.msRequestFullscreen) element.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Crucial fix: Stops arrow keys from scrolling the webpage entirely
+        window.addEventListener("keydown", e => {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) {
+                e.preventDefault();
+            }
+            
+            if (e.key === "ArrowLeft" && dx === 0) { dx = -gridSize; dy = 0; }
+            if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -gridSize; }
+            if (e.key === "ArrowRight" && dx === 0) { dx = gridSize; dy = 0; }
+            if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = gridSize; }
+        }, {passive: false});
+
+        initGame();
+    </script>
+</body>
+</html>
