@@ -8,18 +8,49 @@
         body { 
             background: #0d0f12; 
             color: #fff; 
-            font-family: sans-serif; 
+            font-family: system-ui, -apple-system, sans-serif; 
             text-align: center; 
             margin: 0; 
             padding: 20px; 
+        }
+        .game-container {
+            position: relative;
+            width: 400px;
+            margin: 20px auto;
         }
         canvas { 
             background: #14181f; 
             border: 4px solid #2d3748; 
             display: block; 
-            margin: 20px auto; 
             box-shadow: 0 0 20px rgba(0,255,102,0.15); 
             border-radius: 8px;
+        }
+        /* Game Over Screen Overlay */
+        #gameOverScreen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 15, 18, 0.85);
+            border-radius: 8px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #ff3333;
+            box-sizing: border-box;
+        }
+        #gameOverScreen h2 {
+            color: #ff3333;
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px rgba(255,51,51,0.5);
+        }
+        #finalScore {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #e2e8f0;
         }
         .btn { 
             background: #00ff66; 
@@ -31,52 +62,117 @@
             border-radius: 5px; 
             text-decoration: none; 
             display: inline-block;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            transition: background 0.2s;
         }
         .btn:hover { background: #00cc52; }
+        .btn-restart {
+            background: #ff3333;
+            color: #fff;
+        }
+        .btn-restart:hover {
+            background: #cc2424;
+        }
+        .score-board {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff66;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>🐍 Retro Snake</h1>
     <p>Use Arrow Keys on your keyboard to turn. Eat the red food!</p>
     <a href="index.html" class="btn">Back to Hub</a>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        
+        <div id="gameOverScreen">
+            <h2>GAME OVER</h2>
+            <div id="finalScore">Score: 0</div>
+            <button class="btn btn-restart" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="score-board">Score: <span id="currentScore">0</span></div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        const currentScoreDoc = document.getElementById("currentScore");
+        const finalScoreDoc = document.getElementById("finalScore");
+        
         const gridSize = 20;
-        let snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
-        let dx = gridSize, dy = 0, foodX, foodY, score = 0;
+        let snake, dx, dy, foodX, foodY, score, gameInterval;
 
-        function main() {
-            if (hasGameEnded()) return alert(`Game Over! Score: ${score}`);
-            setTimeout(function onTick() {
-                clearCanvas(); drawFood(); moveSnake(); drawSnake(); main();
+        function initGame() {
+            snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
+            dx = gridSize;
+            dy = 0;
+            score = 0;
+            currentScoreDoc.innerText = score;
+            gameOverScreen.style.display = "none";
+            createFood();
+            nextTick();
+        }
+
+        function nextTick() {
+            if (hasGameEnded()) {
+                finalScoreDoc.innerText = `Final Score: ${score}`;
+                gameOverScreen.style.display = "flex";
+                return;
+            }
+
+            gameInterval = setTimeout(function onTick() {
+                clearCanvas(); 
+                drawFood(); 
+                moveSnake(); 
+                drawSnake(); 
+                nextTick();
             }, 100);
         }
 
         function clearCanvas() { ctx.fillStyle = "#14181f"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
         function drawSnake() { ctx.fillStyle = '#00ff66'; snake.forEach(part => ctx.fillRect(part.x, part.y, gridSize-2, gridSize-2)); }
+        
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             snake.unshift(head);
-            if (snake[0].x === foodX && snake[0].y === foodY) { score += 10; createFood(); } else { snake.pop(); }
+            if (snake[0].x === foodX && snake[0].y === foodY) { 
+                score += 10; 
+                currentScoreDoc.innerText = score;
+                createFood(); 
+            } else { 
+                snake.pop(); 
+            }
         }
+        
         function randomTen(min, max) { return Math.round((Math.random() * (max-min) + min) / gridSize) * gridSize; }
         function createFood() { foodX = randomTen(0, canvas.width - gridSize); foodY = randomTen(0, canvas.height - gridSize); }
         function drawFood() { ctx.fillStyle = '#ff3333'; ctx.fillRect(foodX, foodY, gridSize-2, gridSize-2); }
+        
         function hasGameEnded() {
             for (let i = 4; i < snake.length; i++) { if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; }
             return snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height;
         }
+
+        function resetGame() {
+            clearTimeout(gameInterval);
+            initGame();
+        }
+
         window.addEventListener("keydown", e => {
             if (e.key === "ArrowLeft" && dx === 0) { dx = -gridSize; dy = 0; }
             if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -gridSize; }
             if (e.key === "ArrowRight" && dx === 0) { dx = gridSize; dy = 0; }
             if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = gridSize; }
         });
-        createFood(); main();
+
+        // Start the game for the first time
+        initGame();
     </script>
 </body>
 </html>
