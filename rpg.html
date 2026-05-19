@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Battle - True Black</title>
+    <style>
+        /* Pure OLED Black Aesthetic */
+        body { 
+            background: #000000; 
+            color: #ffffff; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .text-muted {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .controls-wrapper {
+            margin-bottom: 30px;
+        }
+
+        /* Combat Arena Wrapper */
+        .battle-container {
+            max-width: 600px;
+            margin: 20px auto;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            background: #000000;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        /* Character Grid Split */
+        .arena {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .char-box {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            background: #000000;
+        }
+
+        .char-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        /* Minimalist Health Bars */
+        .hp-bar-container {
+            width: 100%;
+            background: #1e293b;
+            height: 10px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .hp-bar {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transition: width 0.3s ease;
+        }
+
+        .hp-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        /* Command Window Logs */
+        .log-box {
+            height: 120px;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            background: #000000;
+            padding: 15px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 25px;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-left: 2px solid #334155;
+            padding-left: 8px;
+        }
+
+        .log-hero { border-color: #ffffff; color: #ffffff; }
+        .log-enemy { border-color: #475569; color: #cbd5e1; }
+        .log-system { border-color: #ef4444; color: #f87171; }
+
+        /* Action Controls */
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn { 
+            background: #ffffff; 
+            color: #000000; 
+            border: none; 
+            padding: 12px 24px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            display: inline-block;
+            font-size: 1rem;
+            transition: background 0.15s ease;
+        }
+
+        .btn:hover:not(:disabled) { 
+            background: #e2e8f0; 
+        }
+
+        .btn:disabled {
+            background: #1e293b;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #1e293b;
+        }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+            border-color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <h1>RPG Battle</h1>
+    <p class="text-muted">Turn-based tactical encounter console.</p>
+    
+    <div class="controls-wrapper">
+        <a href="index.html" class="btn btn-secondary">Back to Hub</a>
+    </div>
+    
+    <div class="battle-container">
+        <div class="arena">
+            <div class="char-box" id="heroBox">
+                <div class="char-name">Hero</div>
+                <div class="hp-bar-container">
+                    <div class="hp-bar" id="heroHpBar"></div>
+                </div>
+                <div class="hp-text" id="heroHpText">HP: 100 / 100</div>
+            </div>
+
+            <div class="char-box" id="enemyBox">
+                <div class="char-name">Orc Rog</div>
+                <div class="hp-bar-container">
+                    <div class="hp-bar" id="enemyHpBar"></div>
+                </div>
+                <div class="hp-text" id="enemyHpText">HP: 120 / 120</div>
+            </div>
+        </div>
+
+        <div class="log-box" id="combatLog">
+            <div class="log-entry">An enemy Orc Rog blocks your way! Battle initialized.</div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" id="attackBtn" onclick="playerAction('attack')">Attack</button>
+            <button class="btn btn-secondary" id="healBtn" onclick="playerAction('heal')">Heal</button>
+            <button class="btn btn-secondary" id="runBtn" onclick="playerAction('run')">Run</button>
+        </div>
+    </div>
+
+    <script>
+        // Character Profiles Set
+        let player = { maxHp: 100, hp: 100, attack: 15, healsLeft: 3 };
+        let enemy = { maxHp: 120, hp: 120, attack: 12, name: "Orc Rog" };
+        let isBattleOver = false;
+
+        const combatLog = document.getElementById("combatLog");
+
+        function updateUi() {
+            // Calculate proportional bar graphics widths
+            const heroHpPct = Math.max(0, (player.hp / player.maxHp) * 100);
+            const enemyHpPct = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
+
+            document.getElementById("heroHpBar").style.width = heroHpPct + "%";
+            document.getElementById("enemyHpBar").style.width = enemyHpPct + "%";
+
+            document.getElementById("heroHpText").innerText = `HP: ${player.hp} / ${player.maxHp}`;
+            document.getElementById("enemyHpText").innerText = `HP: ${enemy.hp} / ${enemy.maxHp}`;
+            document.getElementById("healBtn").innerText = `Heal (${player.healsLeft} Left)`;
+
+            if (isBattleOver) {
+                document.getElementById("attackBtn").disabled = true;
+                document.getElementById("healBtn").disabled = true;
+                document.getElementById("runBtn").innerText = "Restart";
+                document.getElementById("runBtn").setAttribute("onclick", "resetBattle()");
+            }
+        }
+
+        function writeLog(text, customClass = "") {
+            const entry = document.createElement("div");
+            entry.className = `log-entry ${customClass}`;
+            entry.innerText = text;
+            combatLog.appendChild(entry);
+            combatLog.scrollTop = combatLog.scrollHeight; // AutoScroll
+        }
+
+        function playerAction(type) {
+            if (isBattleOver) return;
+
+            if (type === 'attack') {
+                const dmg = Math.floor(Math.random() * player.attack) + 8;
+                enemy.hp = Math.max(0, enemy.hp - dmg);
+                writeLog(`You strike ${enemy.name} for ${dmg} DMG!`, 'log-hero');
+                
+                if (enemy.hp <= 0) {
+                    writeLog(`Victory! ${enemy.name} was defeated.`, 'log-hero');
+                    isBattleOver = true;
+                    updateUi();
+                    return;
+                }
+            } 
+            else if (type === 'heal') {
+                if (player.healsLeft <= 0) {
+                    writeLog("Out of healing charges!", 'log-system');
+                    return;
+                }
+                const healing = Math.floor(Math.random() * 15) + 15;
+                player.hp = Math.min(player.maxHp, player.hp + healing);
+                player.healsLeft--;
+                writeLog(`You patch your wounds, recovering ${healing} HP.`, 'log-hero');
+            } 
+            else if (type === 'run') {
+                writeLog("You managed to escape safely.", 'log-system');
+                isBattleOver = true;
+                updateUi();
+                return;
+            }
+
+            // Disable triggers temporarily during execution step
+            updateUi();
+            document.getElementById("attackBtn").disabled = true;
+            document.getElementById("healBtn").disabled = true;
+
+            // Small latency step before opponent counter attack phase kicks off
+            setTimeout(enemyTurn, 800);
+        }
+
+        function enemyTurn() {
+            if (isBattleOver) return;
+
+            const enemyDmg = Math.floor(Math.random() * enemy.attack) + 6;
+            player.hp = Math.max(0, player.hp - enemyDmg);
+            writeLog(`${enemy.name} retaliates, hitting you for ${enemyDmg} DMG!`, 'log-enemy');
+
+            if (player.hp <= 0) {
+                writeLog("Defeat! You succumbed to your injuries.", 'log-system');
+                isBattleOver = true;
+            }
+
+            // Re-enable actions phase
+            if (!isBattleOver) {
+                document.getElementById("attackBtn").disabled = false;
+                document.getElementById("healBtn").disabled = false;
+            }
+            updateUi();
+        }
+
+        function resetBattle() {
+            player.hp = player.maxHp;
+            player.healsLeft = 3;
+            enemy.hp = enemy.maxHp;
+            isBattleOver = false;
+            
+            combatLog.innerHTML = "";
+            writeLog("A fresh encounter begins. Orc Rog stands ready.", 'log-system');
+            
+            document.getElementById("attackBtn").disabled = false;
+            document.getElementById("healBtn").disabled = false;
+            document.getElementById("runBtn").innerText = "Run";
+            document.getElementById("runBtn").setAttribute("onclick", "playerAction('run')");
+            updateUi();
+        }
+
+        // Run UI Initialization on component load
+        updateUi();
+    </script>
+</body>
+</html>
